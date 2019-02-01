@@ -16,6 +16,10 @@ def load_commands(path: pathlib.Path = pathlib.Path(".", "command"), main_name="
         if child.is_file():
             command_module = importlib.import_module(child.stem, module_str)
 
-            commands[child.stem] = getattr(command_module, main_name)
+            try:
+                commands[child.stem] = getattr(command_module, main_name)
+            except AttributeError:
+                # TODO: Log if verbose
+                continue
     
     return commands
