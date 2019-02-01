@@ -16,6 +16,6 @@ def load_commands(path: pathlib.Path = pathlib.Path(".", "command"), main_name="
         if child.is_file():
             command_module = importlib.import_module(child.stem, module_str)
 
-            commands[child.stem] = getattr(command_module, command_module)
+            commands[child.stem] = getattr(command_module, main_name)
     
     return commands
