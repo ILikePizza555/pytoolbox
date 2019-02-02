@@ -20,21 +20,24 @@ Arguments = namedtuple("Arguments", ["mode", "target", "source"])
 def parse_args(args: List[str]):
     parsed_args, remainder = getopt.getopt(args, "hif")
 
-    if ('-h', '') in parsed_args:
+    if not args or ('-h', '') in parsed_args:
         print(HELP)
-        return 0
+        return None
     
     mode = None
     if parsed_args:
         mode = parsed_args[-1][0][1]
     
     target = Path(remainder[-1])
-    source = map(Path, remainder[:-1])
+    source = list(map(Path, remainder[:-1]))
 
     return Arguments(mode, target, source)
 
 def _cmd_main(args: List[str]):
     args = parse_args(args)
+
+    if not args:
+        return 0
 
     # First synopsis is assumed if target_file does not name an exisiting directory
     if not args.target.is_dir():
@@ -49,7 +52,7 @@ def _cmd_main(args: List[str]):
             answer = input(f"mv: overwrite {target}?")
             if answer.beginswith("y"):
                 s.replace(target)
-        elif s.samefile(target):
+        elif target.exists() and s.samefile(target):
             print(f"mv: error: {target} points to same location {s}")
         else:
             s.rename(target)
