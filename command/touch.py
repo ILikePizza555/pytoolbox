@@ -36,7 +36,7 @@ def parse_time_decimal(time: str):
                              int(time[2:4]), 
                              int(time[4:6]), 
                              int(time[6:8]),
-                             seconds)
+                             int(seconds))
 
 arg_parser = argparse.ArgumentParser(
     prog="touch",
