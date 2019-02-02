@@ -92,6 +92,11 @@ def _cmd_main(args: List[str]):
             f = file_path.open("w+")
             f.close()
 
-            os.utime(file_path)
             continue
+        
+        os.utime(file_path, 
+                 times=get_desired_time(file_path, 
+                                        parsed_args.ref_path or parsed_args.time or parsed_args.date_time,
+                                        parsed_args.change_access_time,
+                                        parsed_args.change_modification_time))
         
