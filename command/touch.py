@@ -53,7 +53,11 @@ arg_parser.add_argument("-m", action="store_true", dest="change_modification_tim
 
 date_group = arg_parser.add_mutually_exclusive_group()
 date_group.add_argument("-r", type=pathlib.Path, dest="ref_path", help="Use the corresponding time of file named by the path instead of the current time.")
-date_group.add_argument("-t")
+date_group.add_argument("-t", type=parse_time_decimal, dest="time", help="Use the specified time instead of the current time.")
+date_group.add_argument("-d", type=datetime.datetime.fromisoformat, dest="date_time", help="Use the specified date_time instead of the current time.")
 
 def _cmd_main(args: List[str]):
-    pass
+    parsed_args = arg_parser.parse_args(args)
+
+    print(args)
+    print(parsed_args)
