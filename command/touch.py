@@ -87,13 +87,16 @@ def get_desired_time(file_path: pathlib.Path,
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
+    # If '-m' and '-a' were both not specified, then touch acts like they both were specified
+    if not parsed_args.change_access_time and not parsed_args.change_modification_time:
+        parsed_args.change_access_time = True
+        parsed_args.change_modification_time = True
+
     for file_path in parsed_args.file:
         if not file_path.exists() and parsed_args.create_file:
             f = file_path.open("w+")
             f.close()
 
-            continue
-        
         os.utime(file_path, 
                  times=get_desired_time(file_path, 
                                         parsed_args.ref_path or parsed_args.time or parsed_args.date_time,
