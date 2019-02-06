@@ -1,6 +1,6 @@
 from collections import namedtuple
 from typing import List
-from pathlib import Path
+from .utils.arg import resolve_paths
 import getopt
 
 HELP ="""
@@ -29,7 +29,7 @@ def parse_args(args: List[str]):
         mode = parsed_args[-1][0][1]
     
     target = Path(remainder[-1])
-    source = list(map(Path, remainder[:-1]))
+    source = resolve_paths(remainder[:-1])
 
     return Arguments(mode, target, source)
 

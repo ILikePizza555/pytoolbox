@@ -1,6 +1,7 @@
 from collections import namedtuple
 from typing import List
 from pathlib import Path
+from .utils.arg import resolve_paths
 import getopt
 import sys
 
@@ -33,7 +34,7 @@ def parse_args(args: List[str]):
     return Arguments(
         next((i[1] for i in reversed(parsed_args) if i == "-f" or i == "-i"), None),
         "-r" in parsed_args or "-R" in parsed_args,
-        list(map(Path, remainder))
+        resolve_paths(remainder)
     )
 
 def remove(files: List[Path], mode: str, recurse: bool):
