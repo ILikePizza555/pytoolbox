@@ -22,11 +22,11 @@ def iterate_input_files(paths: List[Path], default=sys.stdin, **open_args):
     Generator that returns open file handles. If the path is "-", stdin is returned instead.
     """
     if not paths:
-        return sys.stdin
+        return default
     
     for path in paths:
         if str(path) == "-":
-            yield sys.stdin
+            yield default
         else:
             f = open(path, **open_args)
             yield f
