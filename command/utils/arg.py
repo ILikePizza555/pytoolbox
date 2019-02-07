@@ -4,8 +4,7 @@ import sys
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
     """
-    Given a list of paths (say from the arguments), return a list of Path objects to
-    real files.
+    Given a list of paths, which may contain patterns, return a list of Path objects to real files.
     """
     real_paths = []
 
