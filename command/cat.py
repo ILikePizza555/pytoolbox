@@ -1,5 +1,5 @@
 from typing import List
-from .utils.arg import resolve_paths
+from .utils.arg import resolve_paths, iterate_input_files
 import argparse
 import sys
 
@@ -9,20 +9,6 @@ arg_parser = argparse.ArgumentParser(
 )
 arg_parser.add_argument("-u", action="store_true", dest="no_delay", help="Writes bytes to stdout without delay.")
 arg_parser.add_argument("file", nargs="*")
-
-def iterate_files(file_paths: list, open_args: dict={}):
-    if not file_paths:
-        yield sys.stdin
-
-    for p in file_paths:
-        if p == "-":
-            yield sys.stdin
-        else:
-            f = open(p, *open_args)
-            yield f
-            
-            if not f.closed:
-                f.close()
 
 def cat(files, output_func = print):
     for f in files:
@@ -36,7 +22,7 @@ def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
     file_paths = resolve_paths(parsed_args.file)
-    file_iterator = iterate_files(file_paths)
+    file_iterator = iterate_input_files(file_paths, mode="r")
     
     if not parsed_args.no_delay:
         buffer = []
