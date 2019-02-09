@@ -3,17 +3,15 @@ from enum import Enum, Flag, auto
 import argparse
 import re
 
+_camel_match = re.compile(r"(.)([A-Z][a-z])")
 
-class EnumArgParseMixin():
-    camel_match = re.compile(r"(.)([A-Z][a-z])")
 
-    @classmethod
-    def add_arguments(cls, parser, args: List[tuple], dest=None):
-        if not dest:
-            dest = camel_match.sub("\g<1>_\g<2>", dest).lower()
+def add_enum_arguments(enum_type, parser, args: List[tuple], dest=None):
+    if not dest:
+        dest = _camel_match.sub("\g<1>_\g<2>", enum_type.__name__).lower()
 
-        for flag, const, pass_through in args:
-            parser.add_argument(flag, action="store_const", dest=dest, const=const, **pass_through)
+    for flag, const, pass_through in args:
+        parser.add_argument(flag, action="store_const", dest=dest, const=const, **pass_through)
 
 
 class LongOutputMethod(Flag):
@@ -28,13 +26,13 @@ class LongOutputMethod(Flag):
         return parser.add_argument(name, action=flag_or_action(cls), dest=dest, const=const, **kwargs)
 
 
-class EntryOutput(EnumArgParseMixin, Enum):
+class EntryOutput(Enum):
     REGULAR = 0
     SHOW_HIDDEN = 1
     SHOW_HIDDEN_PLUS = 2
 
 
-class ShortOutputFormat(EnumArgParseMixin, Enum):
+class ShortOutputFormat(Enum):
     COLUMNS = 0
     ROWS = 1
     STREAM = 2
@@ -49,15 +47,35 @@ def flag_or_action(flag_type):
     If a dest already exists in the namespace, then dest will be ORed with itself and const. Otherwise it is set to const.
     If no const is specified, flag_type(0) is used.
     """
-    def action_constructor(dest, **kwargs):
+    def action_constructor(option_strings=[],
+                           dest=None,
+                           nargs=None,
+                           const=None,
+                           default=None,
+                           type=None,
+                           choices=None,
+                           required=False,
+                           help=None,
+                           metavar=None):
         def perform_action(parser, namespace, values, option_string=None):
             if hasattr(namespace, dest):
-                setattr(namespace, dest, getattr(namespace, dest) | kwargs.get('const', flag_type(0)))
+                setattr(namespace, dest, getattr(namespace, dest) | const or flag_type(0))
             else:
-                setattr(namespace, dest, kwargs.get('const', flag_type(0)))
+                setattr(namespace, dest, const or flag_type(0))
+
+        perform_action.option_strings = option_strings
+        perform_action.dest = dest
+        perform_action.nargs = nargs
+        perform_action.const = const
+        perform_action.default = default
+        perform_action.type = type
+        perform_action.choices = choices
+        perform_action.required = required
+        perform_action.help = help
+        perform_action.metavar = metavar
 
         return perform_action
-    
+
     return action_constructor
 
 
@@ -76,7 +94,8 @@ LongOutputMethod.add_argument(arg_parser, "-l", LongOutputMethod.LONG, help="Wri
 LongOutputMethod.add_argument(arg_parser, "-n", LongOutputMethod.LONG | LongOutputMethod.NUMERIC, help="Turn on long output, but only print the UID and GID.")
 LongOutputMethod.add_argument(arg_parser, "-o", LongOutputMethod.LONG | LongOutputMethod.NO_GROUP, help="Turn on long ouput, but disable writing the file's group name and number.")
 
-EntryOutput.add_argument(
+add_enum_arguments(
+    EntryOutput,
     arg_parser.add_mutually_exclusive_group(),
     [
         ("-a", EntryOutput.SHOW_HIDDEN, {"help": "Write out all directory entries. Including those starting with '.'. If on Windows, this will also list files marked as hidden."}),
