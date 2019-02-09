@@ -64,12 +64,14 @@ def read_lines(file, n: int, wait: bool = False):
     for l in lines:
         print(l)
 
-def _cmd_main(args: List[args]):
+def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
     if parsed_args.n_bytes:
-        with f as open(parsed_args.file, mode="rb"):
+        with open(parsed_args.file, mode="rb") as f:
             read_bytes(f, parsed_args.n_bytes)
     elif parsed_args.n_lines:
-        with f as open(parsed_args.file, mode="r"):
+        with open(parsed_args.file, mode="r") as f:
             read_lines(f, parsed_args.n_lines)
+
+    return 0
