@@ -1,7 +1,7 @@
 from typing import List
 from enum import Enum, Flag, auto
 from pathlib import Path
-from utils.arg import add_enum_arguments, flag_or_action
+from utils.arg import add_enum_arguments, flag_or_action, resolve_paths
 import argparse
 
 
@@ -56,7 +56,7 @@ arg_parser = argparse.ArgumentParser(
     prog="ls",
     description="List directory contents."
 )
-arg_parser.add_argument("paths", type=Path, nargs="*", default=Path.cwd())
+arg_parser.add_argument("paths", nargs="*", default=".")
 arg_parser.add_argument("-i", action="store_true", dest="write_serial", help="For each file write out the file's serial number.")
 arg_parser.add_argument("-k", action="store_true", dest="kilo_blocks", help="Set the block size to 1024 bytes.")
 arg_parser.add_argument("-q", action="store_true", dest="only_printable", help="Force each instance of non-printable filename characters and <tab> to be written as '?'")
@@ -129,5 +129,18 @@ add_enum_arguments(
     ]
 )
 
+
+def ls(paths: List[Path]):
+    for path in paths:
+        if path.is_dir():
+            for item in path.iterdir():
+                print(item.name)
+
+
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
+
+    paths = resolve_paths(parsed_args.paths, ignore=[])
+    ls(paths)
+
+    return 0
