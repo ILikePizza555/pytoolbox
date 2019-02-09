@@ -38,6 +38,10 @@ class ShortOutputFormat(Enum):
     STREAM = 2
     LIST = 3
 
+class AugmentOutput(Enum):
+    ALL = 0
+    ONLY_DIRECTORIES = 1
+
 
 def flag_or_action(flag_type):
     """
@@ -111,6 +115,15 @@ add_enum_arguments(
         ("-m", ShortOutputFormat.STREAM, {"help": "Output names in a list seperated by a space and a comma."}),
         ("-x", ShortOutputFormat.ROWS, {"help": "Output names sorted in rows."}),
         ("-1", ShortOutputFormat.LIST, {"help": "Output one name per line."})
+    ]
+)
+
+add_enum_arguments(
+    AugmentOutput,
+    arg_parser.add_mutually_exclusive_group()
+    [
+        ("-F", AugmentOutput.ALL, {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk> ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."})
+        ("-p", AugmentOutput.ONLY_DIRECTORIES, {"help": "Write a slash after each filename that's a directory."})
     ]
 )
 
