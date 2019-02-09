@@ -103,6 +103,17 @@ add_enum_arguments(
     ]
 )
 
+add_enum_arguments(
+    ShortOutputFormat,
+    arg_parser.add_mutually_exclusive_group(),
+    [
+        ("-C", ShortOutputFormat.COLUMNS, {"help": "Output names sorted in columns."}),
+        ("-m", ShortOutputFormat.STREAM, {"help": "Output names in a list seperated by a space and a comma."}),
+        ("-x", ShortOutputFormat.ROWS, {"help": "Output names sorted in rows."}),
+        ("-1", ShortOutputFormat.LIST, {"help": "Output one name per line."})
+    ]
+)
+
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
