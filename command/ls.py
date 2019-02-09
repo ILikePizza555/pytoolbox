@@ -1,7 +1,7 @@
 from typing import List
 from enum import Enum, Flag, auto
 from pathlib import Path
-from utils.arg import add_enum_arguments, flag_or_action, resolve_paths
+from command.utils.arg import add_enum_arguments, flag_or_action, resolve_paths
 import argparse
 
 
@@ -92,7 +92,7 @@ add_enum_arguments(
     AugmentOutput,
     arg_parser.add_mutually_exclusive_group(),
     [
-        ("-F", AugmentOutput.ALL, {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk> ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."})
+        ("-F", AugmentOutput.ALL, {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk> ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."}),
         ("-p", AugmentOutput.ONLY_DIRECTORIES, {"help": "Write a slash after each filename that's a directory."})
     ]
 )
@@ -101,13 +101,13 @@ add_enum_arguments(
     DereferenceBehavior,
     arg_parser.add_mutually_exclusive_group(),
     [
-        ("-H", DereferenceBehavior.COMMAND_LINE, {"help": "Evaluate the file information for all links specified on the command line to be that of the file pointed to by the link. However, the name of the link will be printed and not the the file referenced by the link."})
+        ("-H", DereferenceBehavior.COMMAND_LINE, {"help": "Evaluate the file information for all links specified on the command line to be that of the file pointed to by the link. However, the name of the link will be printed and not the the file referenced by the link."}),
         ("-L", DereferenceBehavior.ALL, {"help": "Evaluate the file information for all links encountered to be that of the file pointed to by the link. However, the name of the link will be printed and not the file reference by the link."})
     ]
 )
 
 recurse_group = arg_parser.add_mutually_exclusive_group()
-recurse_group.add_argument("-R", action="store_true", dest="recurse", help="Descend into all subdirectories encountered.")
+recurse_group.add_argument("-R", action="store_true", dest="recurse", help="Descend into all subdirectories encountered."),
 recurse_group.add_argument("-d", action="store_false", default=False, dest="recurse", help="Treat subdirectories no differently.")
 
 add_enum_arguments(
