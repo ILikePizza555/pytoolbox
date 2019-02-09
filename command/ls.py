@@ -49,6 +49,11 @@ class DereferenceBehavior(Enum):
     ALL = 1
 
 
+class SortBehavior(Enum):
+    FILE_SIZE = 0
+    ORDER = 1
+    TIME_MODIFIED = 2
+
 def flag_or_action(flag_type):
     """
     Returns a valid action object to use with add_argument to build flags.
@@ -139,6 +144,20 @@ add_enum_arguments(
     [
         ("-H", DereferenceBehavior.COMMAND_LINE, {"help": "Evaluate the file information for all links specified on the command line to be that of the file pointed to by the link. However, the name of the link will be printed and not the the file referenced by the link."})
         ("-L", DereferenceBehavior.ALL, {"help": "Evaluate the file information for all links encountered to be that of the file pointed to by the link. However, the name of the link will be printed and not the file reference by the link."})
+    ]
+)
+
+recurse_group = arg_parser.add_mutually_exclusive_group()
+recurse_group.add_argument("-R", action="store_true", dest="recurse", help="Descend into all subdirectories encountered.")
+recurse_group.add_argument("-d", action="store_false", default=False, dest="recurse", help="Treat subdirectories no differently.")
+
+add_enum_arguments(
+    SortBehavior,
+    arg_parser.add_mutually_exclusive_group()
+    [
+        ("-S", SortBehavior.FILE_SIZE, {"help": "List the files in order of file size."}),
+        ("-f", SortBehavior.ORDER, {"help": "List the files in the order they appear in the directory."}),
+        ("-t", SortBehavior.TIME_MODIFIED, {"help": "List the files in order of time modified."})
     ]
 )
 
