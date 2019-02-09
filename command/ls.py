@@ -54,6 +54,13 @@ class SortBehavior(Enum):
     ORDER = 1
     TIME_MODIFIED = 2
 
+
+class TimeBehavior(Enum):
+    TIME_MODIFIED = 0
+    CTIME = 1
+    TIME_ACCESSED = 2
+
+
 def flag_or_action(flag_type):
     """
     Returns a valid action object to use with add_argument to build flags.
@@ -131,7 +138,7 @@ add_enum_arguments(
 
 add_enum_arguments(
     AugmentOutput,
-    arg_parser.add_mutually_exclusive_group()
+    arg_parser.add_mutually_exclusive_group(),
     [
         ("-F", AugmentOutput.ALL, {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk> ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."})
         ("-p", AugmentOutput.ONLY_DIRECTORIES, {"help": "Write a slash after each filename that's a directory."})
@@ -140,7 +147,7 @@ add_enum_arguments(
 
 add_enum_arguments(
     DereferenceBehavior,
-    arg_parser.add_mutually_exclusive_group()
+    arg_parser.add_mutually_exclusive_group(),
     [
         ("-H", DereferenceBehavior.COMMAND_LINE, {"help": "Evaluate the file information for all links specified on the command line to be that of the file pointed to by the link. However, the name of the link will be printed and not the the file referenced by the link."})
         ("-L", DereferenceBehavior.ALL, {"help": "Evaluate the file information for all links encountered to be that of the file pointed to by the link. However, the name of the link will be printed and not the file reference by the link."})
@@ -153,11 +160,20 @@ recurse_group.add_argument("-d", action="store_false", default=False, dest="recu
 
 add_enum_arguments(
     SortBehavior,
-    arg_parser.add_mutually_exclusive_group()
+    arg_parser.add_mutually_exclusive_group(),
     [
         ("-S", SortBehavior.FILE_SIZE, {"help": "List the files in order of file size."}),
         ("-f", SortBehavior.ORDER, {"help": "List the files in the order they appear in the directory."}),
         ("-t", SortBehavior.TIME_MODIFIED, {"help": "List the files in order of time modified."})
+    ]
+)
+
+add_enum_arguments(
+    TimeBehavior,
+    arg_parser.add_mutually_exclusive_group(),
+    [
+        ("-c", TimeBehavior.CTIME),
+        ("-u", TimeBehavior.TIME_ACCESSED)
     ]
 )
 
