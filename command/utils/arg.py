@@ -56,10 +56,10 @@ def flag_or_action(flag_type):
     If a dest already exists in the namespace, then dest will be ORed with itself and const. Otherwise it is set to const.
     If no const is specified, flag_type(0) is used.
     """
-    def action_constructor(option_strings=[],
-                           dest=None,
-                           nargs=None,
-                           const=None,
+    def action_constructor(option_strings,
+                           dest,
+                           const,
+                           nargs=0,
                            default=None,
                            type=None,
                            choices=None,

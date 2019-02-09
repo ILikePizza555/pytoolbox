@@ -63,10 +63,11 @@ arg_parser.add_argument("-q", action="store_true", dest="only_printable", help="
 arg_parser.add_argument("-r", action="store_true", dest="reverse_order", help="Reverse the order of the sort.")
 arg_parser.add_argument("-s", action="store_true", dest="display_blocks", help="Indicate the total number of system blocks consumed by each file displayed.")
 
-LongOutputMethod.add_argument(arg_parser, "-g", LongOutputMethod.LONG | LongOutputMethod.NO_OWNER, help="Turn on long output, but disable writing the file owner's name and number.")
-LongOutputMethod.add_argument(arg_parser, "-l", LongOutputMethod.LONG, help="Write output in long format.")
-LongOutputMethod.add_argument(arg_parser, "-n", LongOutputMethod.LONG | LongOutputMethod.NUMERIC, help="Turn on long output, but only print the UID and GID.")
-LongOutputMethod.add_argument(arg_parser, "-o", LongOutputMethod.LONG | LongOutputMethod.NO_GROUP, help="Turn on long ouput, but disable writing the file's group name and number.")
+long_ouput_group = arg_parser.add_mutually_exclusive_group()
+LongOutputMethod.add_argument(long_ouput_group, "-g", LongOutputMethod.LONG | LongOutputMethod.NO_OWNER, help="Turn on long output, but disable writing the file owner's name and number.")
+LongOutputMethod.add_argument(long_ouput_group, "-l", LongOutputMethod.LONG, help="Write output in long format.")
+LongOutputMethod.add_argument(long_ouput_group, "-n", LongOutputMethod.LONG | LongOutputMethod.NUMERIC, help="Turn on long output, but only print the UID and GID.")
+LongOutputMethod.add_argument(long_ouput_group, "-o", LongOutputMethod.LONG | LongOutputMethod.NO_GROUP, help="Turn on long ouput, but disable writing the file's group name and number.")
 
 add_enum_arguments(
     EntryOutput,
