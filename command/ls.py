@@ -38,9 +38,15 @@ class ShortOutputFormat(Enum):
     STREAM = 2
     LIST = 3
 
+
 class AugmentOutput(Enum):
     ALL = 0
     ONLY_DIRECTORIES = 1
+
+
+class DereferenceBehavior(Enum):
+    COMMAND_LINE = 0
+    ALL = 1
 
 
 def flag_or_action(flag_type):
@@ -127,6 +133,14 @@ add_enum_arguments(
     ]
 )
 
+add_enum_arguments(
+    DereferenceBehavior,
+    arg_parser.add_mutually_exclusive_group()
+    [
+        ("-H", DereferenceBehavior.COMMAND_LINE, {"help": "Evaluate the file information for all links specified on the command line to be that of the file pointed to by the link. However, the name of the link will be printed and not the the file referenced by the link."})
+        ("-L", DereferenceBehavior.ALL, {"help": "Evaluate the file information for all links encountered to be that of the file pointed to by the link. However, the name of the link will be printed and not the file reference by the link."})
+    ]
+)
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
