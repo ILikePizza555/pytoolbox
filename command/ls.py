@@ -131,12 +131,18 @@ add_enum_arguments(
 )
 
 
-def ls(paths: List[Path]):
+def ls(paths: List[Path], print_func, recurse=False):
     for path in paths:
-        if path.is_dir():
-            for item in path.iterdir():
-                print(item.name)
+        if len(paths) > 1 or recurse:
+            print(f"{path}:")
 
+        if path.is_dir():
+            items = list(path.iterdir())
+
+            print_func(items)
+
+            if recurse:
+                ls([x for x in items if x.is_dir()], print_func, recurse)
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
