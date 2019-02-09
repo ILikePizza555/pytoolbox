@@ -56,7 +56,7 @@ arg_parser = argparse.ArgumentParser(
     prog="ls",
     description="List directory contents."
 )
-arg_parser.add_argument("paths", nargs="*", default=".")
+arg_parser.add_argument("paths", nargs="*", default=["."])
 arg_parser.add_argument("-i", action="store_true", dest="write_serial", help="For each file write out the file's serial number.")
 arg_parser.add_argument("-k", action="store_true", dest="kilo_blocks", help="Set the block size to 1024 bytes.")
 arg_parser.add_argument("-q", action="store_true", dest="only_printable", help="Force each instance of non-printable filename characters and <tab> to be written as '?'")
@@ -124,8 +124,8 @@ add_enum_arguments(
     TimeBehavior,
     arg_parser.add_mutually_exclusive_group(),
     [
-        ("-c", TimeBehavior.CTIME),
-        ("-u", TimeBehavior.TIME_ACCESSED)
+        ("-c", TimeBehavior.CTIME, {}),
+        ("-u", TimeBehavior.TIME_ACCESSED, {})
     ]
 )
 
@@ -140,7 +140,7 @@ def ls(paths: List[Path]):
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
-    paths = resolve_paths(parsed_args.paths, ignore=[])
+    paths = resolve_paths(parsed_args.paths, ignore=["."])
     ls(paths)
 
     return 0
