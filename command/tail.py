@@ -3,12 +3,14 @@ from pathlib import Path
 import argparse
 import io
 
+
 def parse_n(in_str: str) -> int:
     if in_str.startswith("+"):
         return int(in_str[1:])
     if in_str.startswith("-"):
         return -1 * int(in_str[1:])
     return -1 * int(in_str)
+
 
 arg_parser = argparse.ArgumentParser(
     prog="tail",
@@ -20,6 +22,7 @@ number_group = arg_parser.add_mutually_exclusive_group()
 number_group.add_argument("-c", type=parse_n, metavar="n", dest="n_bytes", help="Read n bytes from the file.")
 number_group.add_argument("-n", type=parse_n, metavar="n", dest="n_lines", default=10, help="Read n lines from the file.")
 
+
 def read_bytes(file, n: int, wait: bool = False):
     """
     Reads n bytes relative to the start of the file.
@@ -30,11 +33,11 @@ def read_bytes(file, n: int, wait: bool = False):
 
     if not file.seekable():
         raise ValueError("file is not seekable")
-    
+
     if n < 0:
         file.seek(n, io.SEEK_END)
         n = n * -1
-    
+
     if not wait:
         print(file.read(n), end="")
     else:
@@ -46,6 +49,7 @@ def read_bytes(file, n: int, wait: bool = False):
             else:
                 print(output, end="")
                 n -= len(output)
+
 
 def read_lines(file, n: int, wait: bool = False):
     """
@@ -63,6 +67,7 @@ def read_lines(file, n: int, wait: bool = False):
 
     for l in lines:
         print(l)
+
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
