@@ -1,6 +1,6 @@
 from typing import Any, List, Union, Optional
 from pathlib import Path
-from enum import Enum
+from enum import Enum, Flag, auto
 import re
 import sys
 
@@ -19,6 +19,9 @@ class EnumArg(Enum):
     """
     
     def __new__(cls, value: Any, flag: List[str], dest: Optional[str] = None):
+        if isinstance(value, auto):
+            value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
+
         obj = object.__new__(cls)
         obj._value_ = value
         obj.arg_flags = flag
@@ -38,6 +41,15 @@ class EnumArg(Enum):
             else:
                 parser.add_argument(*i.arg_flags, dest=i.dest, **args)
 
+
+class FlagArg(EnumArg):
+    __bool__    = Flag.__bool__
+    __or__      = Flag.__or__
+    __and__     = Flag.__and__
+    __invert__  = Flag.__invert__
+    __xor__     = Flag.__xor__
+
+    _generate_next_value_ = Flag._generate_next_value_
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
     """
