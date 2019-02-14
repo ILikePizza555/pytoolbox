@@ -8,6 +8,10 @@ import sys
 _camel_match = re.compile(r"(.)([A-Z][a-z])")
 
 
+def _to_camel_case(name):
+    return _camel_match.sub("\g<1>_\g<2>", name).lower()
+
+
 class EnumArg(Enum):
     """
     Enum mixin that makes usage with argparse easier.
@@ -93,7 +97,10 @@ class FlagArg(Flag):
         return obj
     
     @classmethod
-    def add_to_parser(cls, parser, dest, action=flag_or_action, **kwargs):
+    def add_to_parser(cls, parser, dest=None, action=flag_or_action, **kwargs):
+        if not dest:
+            dest = _to_camel_case(cls.__name__)
+
         for i in cls:
             parser.add_argument(*i.flags, dest=dest, action=action, **kwargs)
 
@@ -133,7 +140,7 @@ def iterate_input_files(paths: List[Path], default=sys.stdin, **open_args):
 
 def add_enum_arguments(enum_type, parser, args: List[tuple], dest=None):
     if not dest:
-        dest = _camel_match.sub("\g<1>_\g<2>", enum_type.__name__).lower()
+        dest = _to_camel_case(enum_type.__name__)
 
     for flag, const, pass_through in args:
         parser.add_argument(flag, action="store_const", dest=dest, const=const, **pass_through)
