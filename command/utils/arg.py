@@ -42,6 +42,46 @@ class EnumArg(Enum):
                 parser.add_argument(*i.arg_flags, dest=i.dest, **kwargs)
 
 
+def flag_or_action(flag_type):
+    """
+    Returns a valid action object to use with add_argument to build flags.
+
+    The action object behaves as follows:
+    If a dest already exists in the namespace, then dest will be ORed with itself and const. Otherwise it is set to const.
+    If no const is specified, flag_type(0) is used.
+    """
+    def action_constructor(option_strings,
+                           dest,
+                           const,
+                           nargs=0,
+                           default=None,
+                           type=None,
+                           choices=None,
+                           required=False,
+                           help=None,
+                           metavar=None):
+        def perform_action(parser, namespace, values, option_string=None):
+            if hasattr(namespace, dest):
+                setattr(namespace, dest, getattr(namespace, dest) | const or flag_type(0))
+            else:
+                setattr(namespace, dest, const or flag_type(0))
+
+        perform_action.option_strings = option_strings
+        perform_action.dest = dest
+        perform_action.nargs = nargs
+        perform_action.const = const
+        perform_action.default = default
+        perform_action.type = type
+        perform_action.choices = choices
+        perform_action.required = required
+        perform_action.help = help
+        perform_action.metavar = metavar
+
+        return perform_action
+
+    return action_constructor
+
+
 class FlagArg(Flag):
     def __new__(cls, value, flags: List[str]):
         if isinstance(value, auto):
@@ -53,9 +93,9 @@ class FlagArg(Flag):
         return obj
     
     @classmethod
-    def add_to_parser(cls, parser, dest, **kwargs):
+    def add_to_parser(cls, parser, dest, action=flag_or_action, **kwargs):
         for i in cls:
-            parser.add_argument(*i.flags, dest=dest, **kwargs)
+            parser.add_argument(*i.flags, dest=dest, action=action, **kwargs)
 
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
@@ -97,43 +137,3 @@ def add_enum_arguments(enum_type, parser, args: List[tuple], dest=None):
 
     for flag, const, pass_through in args:
         parser.add_argument(flag, action="store_const", dest=dest, const=const, **pass_through)
-
-
-def flag_or_action(flag_type):
-    """
-    Returns a valid action object to use with add_argument to build flags.
-
-    The action object behaves as follows:
-    If a dest already exists in the namespace, then dest will be ORed with itself and const. Otherwise it is set to const.
-    If no const is specified, flag_type(0) is used.
-    """
-    def action_constructor(option_strings,
-                           dest,
-                           const,
-                           nargs=0,
-                           default=None,
-                           type=None,
-                           choices=None,
-                           required=False,
-                           help=None,
-                           metavar=None):
-        def perform_action(parser, namespace, values, option_string=None):
-            if hasattr(namespace, dest):
-                setattr(namespace, dest, getattr(namespace, dest) | const or flag_type(0))
-            else:
-                setattr(namespace, dest, const or flag_type(0))
-
-        perform_action.option_strings = option_strings
-        perform_action.dest = dest
-        perform_action.nargs = nargs
-        perform_action.const = const
-        perform_action.default = default
-        perform_action.type = type
-        perform_action.choices = choices
-        perform_action.required = required
-        perform_action.help = help
-        perform_action.metavar = metavar
-
-        return perform_action
-
-    return action_constructor
