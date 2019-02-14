@@ -1,10 +1,42 @@
-from typing import List, Union
+from typing import Any, List, Union, Optional
 from pathlib import Path
+from enum import Enum
 import re
 import sys
 
 
 _camel_match = re.compile(r"(.)([A-Z][a-z])")
+
+
+class EnumArg(Enum):
+    """
+    Enum mixin that makes usage with argparse easier.
+
+    Each enum member takes a set of paramters:
+        - value: any, the value of the enum member
+        - flag: List[str], a list of flags that that should set this value
+        - dest: str, an optional string specifying the dest argument in argparse
+    """
+    
+    def __new__(cls, value: Any, flag: List[str], dest: Optional[str] = None):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.arg_flags = flag
+        obj.dest = dest
+        return obj
+    
+    @classmethod
+    def add_to_parser(cls, parser, args={}):
+        """
+        Adds the enum to an argument parser from the argparse library.
+
+        If `dest` exists in args, the member's dest argument is ignored.
+        """
+        for i in cls:
+            if "dest" in args:
+                parser.add_argument(*i.arg_flags, **args)
+            else:
+                parser.add_argument(*i.arg_flags, dest=i.dest, **args)
 
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
