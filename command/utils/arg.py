@@ -29,27 +29,34 @@ class EnumArg(Enum):
         return obj
     
     @classmethod
-    def add_to_parser(cls, parser, args={}):
+    def add_to_parser(cls, parser, **kwargs):
         """
         Adds the enum to an argument parser from the argparse library.
 
         If `dest` exists in args, the member's dest argument is ignored.
         """
         for i in cls:
-            if "dest" in args:
-                parser.add_argument(*i.arg_flags, **args)
+            if "dest" in kwargs:
+                parser.add_argument(*i.arg_flags, kwargs)
             else:
-                parser.add_argument(*i.arg_flags, dest=i.dest, **args)
+                parser.add_argument(*i.arg_flags, dest=i.dest, **kwargs)
 
 
-class FlagArg(EnumArg):
-    __bool__    = Flag.__bool__
-    __or__      = Flag.__or__
-    __and__     = Flag.__and__
-    __invert__  = Flag.__invert__
-    __xor__     = Flag.__xor__
+class FlagArg(Flag):
+    def __new__(cls, value, flags: List[str]):
+        if isinstance(value, auto):
+            value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
 
-    _generate_next_value_ = Flag._generate_next_value_
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.flags = flags
+        return obj
+    
+    @classmethod
+    def add_to_parser(cls, parser, dest, **kwargs):
+        for i in cls:
+            parser.add_argument(*i.flags, dest=dest, **kwargs)
+
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
     """
