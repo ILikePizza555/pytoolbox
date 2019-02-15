@@ -13,14 +13,14 @@ def multifind(s: str, items: set, start=0):
     return (len(s), len(s))
 
 
-def multisplit(s: str, delims: set, max_split=-1):
+def multisplit(s: str, delims: set, max_split=-1, filter_empty=True):
     rv = []
 
     last_end = 0
     while max_split != 0:
         b, e = multifind(s, delims, last_end)
 
-        if last_end != b:
+        if not filter_empty or last_end != b:
             rv.append(s[last_end:b])
             max_split -= 1
 
