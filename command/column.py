@@ -169,9 +169,10 @@ class Table():
 
         for item in input:
             table.append_to_column(item)
+            row = len(table.columns[-1]) - 1
 
-            # Continiously add rows until we fit or only have one column
-            for n in range(len(table.columns[-1]) - 1, -1, -1):
+            # Continiously add rows until the current row and previous rows fit or only have one column
+            for n in range(row, -1, -1):
                 while n_row_size(n) > max_row_width and table.col_num > 1:
                     table.add_row()
 
@@ -179,5 +180,5 @@ class Table():
 
     @classmethod
     def create_row_first(cls, input, max_row_width, col_padding: int = 0, length_function=len):
-        table = cls()
-
+        n_col = int(max_row_width / (max(map(length_function, input)) + col_padding))
+        return cls([input[a::n_col] for a in range(n_col)])
