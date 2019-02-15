@@ -26,3 +26,12 @@ def test_compress_columns(table, r, expected_state):
     table._compress_columns(r)
 
     assert table.columns == expected_state
+
+
+@pytest.mark.parametrize("input,max_row_width,padding, expected", [
+    ("abc", 2, 0, [["a", "b"], ["c"]]),
+    (["i", "in", "inc", "incr", "incre"], 4, 0, [["i", "in", "inc", "incr", "incre"]])
+])
+def test_create_column_first(input, max_row_width, padding, expected):
+    actual = Table.create_column_first(input, max_row_width, padding)
+    assert actual == expected
