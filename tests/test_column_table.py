@@ -35,4 +35,4 @@ def test_compress_columns(table, r, expected_state):
 ])
 def test_create_column_first(input, max_row_width, padding, expected):
     actual = Table.create_column_first(input, max_row_width, padding)
-    assert actual == expected
+    assert actual.columns == expected

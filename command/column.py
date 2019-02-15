@@ -170,8 +170,13 @@ class Table():
             table.append_to_column(item)
 
             # Continiously add rows until we fit or only have one column
-            n = len(table.columns[-1]) - 1
-            while n_row_size(n) > max_row_width and table.col_num > 1:
-                table.add_row()
+            for n in range(len(table.columns[-1]) - 1, -1, -1):
+                while n_row_size(n) > max_row_width and table.col_num > 1:
+                    table.add_row()
         
         return table
+    
+    @classmethod
+    def create_row_first(cls, input, max_row_width, col_padding: int = 0, length_function=len):
+        table = cls()
+
