@@ -45,8 +45,9 @@ The `column` utility formats its input into multiple columns. It supports three 
 `-x`, `--fillrows`
     Fill rows before columns.
 """
-from utils.arg import FlagArg
+from command.utils.arg import FlagArg
 from enum import auto
+from typing import Any, List
 import argparse
 import string
 import os
@@ -83,3 +84,100 @@ def _resolve_defaults(parsed_args):
             parsed_args.separator = set(string.whitespace)
         else:
             parsed_args.separator = set("\n")
+
+
+class Table():
+    class RowIter():
+        def __init__(self, table, row_index):
+            self._n = 0
+            self.table = table
+            self.row_index = row_index
+
+        def __iter__(self):
+            self._n = 0
+            return self
+
+        def __next__(self):
+            if self._n < self.table.col_num:
+                try:
+                    rv = self.table.columns[self._n][self.row_index]
+                    self._n += 1
+                    return rv
+                except IndexError:
+                    raise StopIteration
+            else:
+                raise StopIteration
+
+        def __len__(self):
+            return sum(1 for x in self)
+
+    def __init__(self):
+        self._rows = 1
+        self.columns: List[List[Any]] = [[]]
+
+    def _take(self, n, start=0):
+        rv = []
+        for i_col in range(start, self.col_num):
+            rv.append(self.columns[i_col].pop(0))
+
+            # Clean up empty columns
+            if not self.columns[i_col]:
+                del self.columns[i_col]
+            
+            if len(rv) == n:
+                break
+        return rv
+
+    def _compress_columns(self, row_count):
+        for i_col in range(self.col_num):
+            n = row_count - len(self.columns[i_col])
+            self.columns[i_col].extend(self._take(n, i_col + 1))
+
+    @property
+    def col_num(self):
+        return len(self.columns)
+
+    @property
+    def row_num(self):
+        return self._rows
+
+    @property
+    def rows(self):
+        return tuple(Table.RowIter(self, i) for i in range(self.row_num))
+    
+    def append_to_column(self, item):
+        """
+        Adds an item to the table, filling up the last column before making a new one
+        """
+        if len(self.columns[-1]) == self.row_num:
+            self.columns.append([])
+        self.columns[-1].append(item)
+
+    def add_row(self, compress_columns=True):
+        """
+        Adds a new row to the table. If compress_columns is true, then existings columns will be compressed to fill the new row.
+        """
+        self._rows += 1
+
+        if compress_columns:
+            self._compress_columns(self._rows)
+
+    @classmethod
+    def create_column_first(cls, input, max_row_width: int, column_padding: int = 0, length_function=len):
+        """
+        Creates a new table from the input by filling columns first. 
+        """
+        table = cls()
+
+        for item in input:
+            last_row = table.rows[-1]
+
+            # Calculate the new row size to see if we need to compress
+            last_row_size = sum(length_function(x) + column_padding for x in last_row)
+            new_row_size = length_function(item) + last_row_size
+
+            # Continiously add rows until we fit or only have one column
+            while new_row_size > max_row_width and table.col_num > 1:
+                table.add_row()
+            
+            table.append_to_column(item)
