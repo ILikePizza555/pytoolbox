@@ -45,7 +45,8 @@ The `column` utility formats its input into multiple columns. It supports three 
 `-x`, `--fillrows`
     Fill rows before columns.
 """
-from command.utils.arg import EnumArg
+from command.utils.arg import EnumArg, resolve_paths, iterate_input_files
+from command.utils.string import multisplit
 from enum import auto
 from typing import Any, List
 import argparse
@@ -149,15 +150,18 @@ class Table():
         return tuple(Table.RowIter(self, i) for i in range(self.row_num))
 
     def append_to_column(self, item, start=-1):
-        """Adds an item to the first column with an empty space beginning from start. If no empty space is available, then a new column is created"""
+        """
+        Adds an item to the first column with an empty space beginning from start. 
+        If no empty space is available, then a new column is created
+        """
         c = next((x for x in self.columns[start:] if len(x) < self.row_num), None)
 
         if c is None:
             self.columns.append([item])
         else:
             c.append(item)
-
-    def append_to_row(self, item, row, start=-1):
+    
+    def append_to_row(self, item, row, start=0, fill_value=None):
         """
         Adds an item to the first column with an empty space in the specified row beginning from start. 
         If no empty space is available, then a new column is created.
@@ -165,11 +169,13 @@ class Table():
         if row > self.row_num:
             raise IndexError("Row number is out of range.")
 
-        c = next((x for x in self.columns[start:] if len(x) < row), None)
+        c = next((x for x in self.columns[start:] if len(x) <= row), None)
 
         if c is None:
-            c = [None] * (row - 1)
+            c = []
             self.columns.append(c)
+
+        c.extend([fill_value] * (row - len(c)))
         c.append(item)
 
     def add_row(self, compress_columns=True):
@@ -237,3 +243,4 @@ def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
     _resolve_defaults(parsed_args)
 
+    parsed_args.file = resolve_paths(parsed_args.file or "-")
