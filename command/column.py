@@ -89,9 +89,11 @@ def _resolve_defaults(parsed_args):
 class Table():
     class RowIter():
         def __init__(self, table, row_index):
-            self._n = 0
             self.table = table
             self.row_index = row_index
+
+        def __repr__(self):
+            return f"<Row({self.row_index}): {list(self)}>"
 
         def __getitem__(self, key):
             return self.table.columns[key][self.row_index]
