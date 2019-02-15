@@ -93,27 +93,15 @@ class Table():
             self.table = table
             self.row_index = row_index
 
-        def __iter__(self):
-            self._n = 0
-            return self
-
-        def __next__(self):
-            if self._n < self.table.col_num:
-                try:
-                    rv = self.table.columns[self._n][self.row_index]
-                    self._n += 1
-                    return rv
-                except IndexError:
-                    raise StopIteration
-            else:
-                raise StopIteration
+        def __getitem__(self, key):
+            return self.table.columns[key][self.row_index]
 
         def __len__(self):
             return sum(1 for x in self)
 
-    def __init__(self, columns: List[List[Any]] = [[]]):
-        self.columns: List[List[Any]] = columns
-        self._rows = max([len(x) for x in columns], default=1) or 1
+    def __init__(self, columns=None):
+        self.columns = columns or [[]]
+        self._rows = max([len(x) for x in self.columns], default=1) or 1
 
     def _take(self, n, start=0):
         rv = []
@@ -169,7 +157,7 @@ class Table():
     @classmethod
     def create_column_first(cls, input, max_row_width: int, column_padding: int = 0, length_function=len):
         """
-        Creates a new table from the input by filling columns first. 
+        Creates a new table from the input by filling columns first.
         """
         table = cls()
 
@@ -183,5 +171,7 @@ class Table():
             # Continiously add rows until we fit or only have one column
             while new_row_size > max_row_width and table.col_num > 1:
                 table.add_row()
-            
+
             table.append_to_column(item)
+        
+        return table
