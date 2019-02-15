@@ -161,17 +161,15 @@ class Table():
         """
         table = cls()
 
-        for item in input:
-            last_row = table.rows[-1]
+        def n_row_size(n):
+            return sum(length_function(x) + column_padding for x in table.rows[n])
 
-            # Calculate the new row size to see if we need to compress
-            last_row_size = sum(length_function(x) + column_padding for x in last_row)
-            new_row_size = length_function(item) + last_row_size
+        for item in input:
+            table.append_to_column(item)
 
             # Continiously add rows until we fit or only have one column
-            while new_row_size > max_row_width and table.col_num > 1:
+            n = len(table.columns[-1]) - 1
+            while n_row_size(n) > max_row_width and table.col_num > 1:
                 table.add_row()
-
-            table.append_to_column(item)
         
         return table
