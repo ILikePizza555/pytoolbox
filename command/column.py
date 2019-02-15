@@ -128,6 +128,9 @@ class Table():
         return rv
 
     def _compress_columns(self, row_count):
+        if row_count < self.row_num:
+            raise ValueError("row_count cannot be less than current number of rows")
+
         for i_col in range(self.col_num):
             n = row_count - len(self.columns[i_col])
             self.columns[i_col].extend(self._take(n, i_col + 1))
