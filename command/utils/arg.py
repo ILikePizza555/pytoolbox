@@ -41,7 +41,7 @@ class EnumArg(Enum):
         """
         for i in cls:
             if "dest" in kwargs:
-                parser.add_argument(*i.arg_flags, kwargs)
+                parser.add_argument(*i.arg_flags, **kwargs)
             else:
                 parser.add_argument(*i.arg_flags, dest=i.dest, **kwargs)
 
