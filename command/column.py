@@ -220,6 +220,18 @@ class Table():
         n_col = int(max_row_width / (max(map(length_function, input)) + col_padding))
         return cls([input[a::n_col] for a in range(n_col)])
 
+    @classmethod
+    def table_from_lines(cls, lines: List[str], separator=set(string.whitespace)):
+        table = cls()
+
+        for n, row_str in enumerate(lines):
+            for entry in multisplit(row_str, separator):
+                table.append_to_row(entry, n, fill_value="")
+
+            table.add_row(False)
+
+        return table
+
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
