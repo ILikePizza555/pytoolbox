@@ -99,10 +99,16 @@ class Table():
             return f"<Row({self.row_index}): {list(self)}>"
 
         def __getitem__(self, key):
-            return self.table.columns[key][self.row_index]
+            if key > self.table.col_num:
+                raise IndexError(f"{key} is larger than the number of columns")
+
+            try:
+                return self.table.columns[key][self.row_index]
+            except IndexError:
+                return None
 
         def __len__(self):
-            return sum(1 for x in self)
+            return self.table.col_num
 
     def __init__(self, columns=None):
         self.columns = columns or [[]]
@@ -164,8 +170,13 @@ class Table():
         """Prints the table."""
         col_sizes = [max(map(length_f, c)) for c in self.columns]
 
+        def rewrite_none(s):
+            if not s:
+                return ""
+            return s
+
         for r in self.rows:
-            out = (x.ljust(size) for x, size in zip(r, col_sizes))
+            out = (x.ljust(size) for x, size in zip(map(rewrite_none, r), col_sizes))
             print(*out, sep=col_separator, **print_args)
 
     @classmethod
