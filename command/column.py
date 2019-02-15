@@ -157,6 +157,21 @@ class Table():
         else:
             c.append(item)
 
+    def append_to_row(self, item, row, start=-1):
+        """
+        Adds an item to the first column with an empty space in the specified row beginning from start. 
+        If no empty space is available, then a new column is created.
+        """
+        if row > self.row_num:
+            raise IndexError("Row number is out of range.")
+
+        c = next((x for x in self.columns[start:] if len(x) < row), None)
+
+        if c is None:
+            c = [None] * (row - 1)
+            self.columns.append(c)
+        c.append(item)
+
     def add_row(self, compress_columns=True):
         """
         Adds a new row to the table. If compress_columns is true, then existings columns will be compressed to fill the new row.
