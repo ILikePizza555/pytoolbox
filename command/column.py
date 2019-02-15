@@ -45,14 +45,15 @@ The `column` utility formats its input into multiple columns. It supports three 
 `-x`, `--fillrows`
     Fill rows before columns.
 """
-from command.utils.arg import FlagArg
+from command.utils.arg import EnumArg
 from enum import auto
 from typing import Any, List
 import argparse
 import string
 import os
 
-class OutputMode(FlagArg):
+
+class OutputMode(EnumArg):
     COL_FIRST = auto(), ["--fillcolumns"]
     ROW_FIRST = auto(), ["-x", "--fillrows"]
     TABLE = auto(), ["-t", "--table"]
@@ -63,10 +64,12 @@ arg_parser = argparse.ArgumentParser(
     description="Formats its input into multiple columns."
 )
 arg_parser.add_argument("file", nargs="*")
-arg_parser.add_argument("-c", "--output-width", dest="output_width", type=int, default=None, help="Output is formatted to a width specified as a number of characters.")
-arg_parser.add_argument("-o", "--output-separator", dest="output_separator", default="  ", help="Specify the columns delimiter. The default is 2 spaces.")
-arg_parser.add_argument("-s", "--separator", dest="separator", type=set, help="Specifies a set of possible input deliminators. In column-first and row-first mode the default is newline. In table mode, the default is all whitespace.")
-OutputMode.add_to_parser(arg_parser.add_mutually_exclusive_group())
+arg_parser.add_argument("-c", "--output-width",     dest="output_width",        default=None, type=int,         help="Output is formatted to a width specified as a number of characters.")
+arg_parser.add_argument("-o", "--output-separator", dest="output_separator",    default="  ",                   help="Specify the columns delimiter. The default is 2 spaces.")
+arg_parser.add_argument("-s", "--separator",        dest="separator",           type=set,                       help="Specifies a set of possible input deliminators. In column-first and row-first mode the default is newline. In table mode, the default is all whitespace.")
+arg_parser.add_argument("-d", "--table-noheadings", dest="print_headings",      action="store_false",           help="In table mode, do not print out the headings.")
+arg_parser.add_argument("-N", "--table-columns",    dest="column_names",        type=lambda s: s.split(","),    help="Specify the column names by a comma separated list of names.")
+OutputMode.add_to_parser(arg_parser.add_mutually_exclusive_group(), dest="output_mode")
 
 
 def _resolve_defaults(parsed_args):
@@ -138,7 +141,7 @@ class Table():
     @property
     def rows(self):
         return tuple(Table.RowIter(self, i) for i in range(self.row_num))
-    
+
     def append_to_column(self, item, start=-1):
         """Adds an item to the first column with an empty space beginning from start. If no empty space is available, then a new column is created"""
         c = next((x for x in self.columns[start:] if len(x) < self.row_num), None)
@@ -182,3 +185,9 @@ class Table():
     def create_row_first(cls, input, max_row_width, col_padding: int = 0, length_function=len):
         n_col = int(max_row_width / (max(map(length_function, input)) + col_padding))
         return cls([input[a::n_col] for a in range(n_col)])
+
+
+def _cmd_main(args: List[str]):
+    parsed_args = arg_parser.parse_args(args)
+    _resolve_defaults(parsed_args)
+
