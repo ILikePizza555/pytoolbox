@@ -159,6 +159,14 @@ class Table():
 
         if compress_columns:
             self._compress_columns(self._rows)
+    
+    def print_table(self, col_separator="  ", length_f=len, **print_args):
+        """Prints the table."""
+        col_sizes = [max(map(length_f, c)) for c in self.columns]
+
+        for r in self.rows:
+            out = (x.ljust(size) for x, size in zip(r, col_sizes))
+            print(*out, sep=col_separator, **print_args)
 
     @classmethod
     def create_column_first(cls, input, max_row_width: int, column_padding: int = 0, length_function=len):
