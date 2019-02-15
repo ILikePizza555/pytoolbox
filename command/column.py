@@ -231,8 +231,8 @@ class Table():
         table = cls()
 
         for n, row_str in enumerate(lines):
-            for entry in multisplit(row_str, separator):
-                table.append_to_row(entry, n, fill_value="")
+            for entry in multisplit(row_str, separator, filter_empty=False):
+                table.append_to_row(entry.lstrip(), n, fill_value="")
 
             table.add_row(False)
 
