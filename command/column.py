@@ -111,21 +111,20 @@ class Table():
         def __len__(self):
             return sum(1 for x in self)
 
-    def __init__(self):
-        self._rows = 1
-        self.columns: List[List[Any]] = [[]]
+    def __init__(self, columns: List[List[Any]] = [[]]):
+        self.columns: List[List[Any]] = columns
+        self._rows = max([len(x) for x in columns], default=1) or 1
 
     def _take(self, n, start=0):
         rv = []
-        for i_col in range(start, self.col_num):
-            rv.append(self.columns[i_col].pop(0))
 
-            # Clean up empty columns
-            if not self.columns[i_col]:
-                del self.columns[i_col]
-            
-            if len(rv) == n:
-                break
+        while len(rv) < n and start < self.col_num:
+            if self.columns[start]:
+                rv.append(self.columns[start].pop(0))
+
+            if not self.columns[start]:
+                del self.columns[start]
+
         return rv
 
     def _compress_columns(self, row_count):
