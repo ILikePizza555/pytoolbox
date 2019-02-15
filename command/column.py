@@ -139,13 +139,14 @@ class Table():
     def rows(self):
         return tuple(Table.RowIter(self, i) for i in range(self.row_num))
     
-    def append_to_column(self, item):
-        """
-        Adds an item to the table, filling up the last column before making a new one
-        """
-        if len(self.columns[-1]) == self.row_num:
-            self.columns.append([])
-        self.columns[-1].append(item)
+    def append_to_column(self, item, start=-1):
+        """Adds an item to the first column with an empty space beginning from start. If no empty space is available, then a new column is created"""
+        c = next((x for x in self.columns[start:] if len(x) < self.row_num), None)
+
+        if c is None:
+            self.columns.append([item])
+        else:
+            c.append(item)
 
     def add_row(self, compress_columns=True):
         """
@@ -173,9 +174,9 @@ class Table():
             for n in range(len(table.columns[-1]) - 1, -1, -1):
                 while n_row_size(n) > max_row_width and table.col_num > 1:
                     table.add_row()
-        
+
         return table
-    
+
     @classmethod
     def create_row_first(cls, input, max_row_width, col_padding: int = 0, length_function=len):
         table = cls()

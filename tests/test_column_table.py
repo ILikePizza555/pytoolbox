@@ -28,6 +28,18 @@ def test_compress_columns(table, r, expected_state):
     assert table.columns == expected_state
 
 
+@pytest.mark.parametrize("table,start,expected_state", [
+    (Table(),                    -1, [["test"]]),
+    (Table([["a"]]),             -1, [["a"], ["test"]]),
+    (Table([["a", "b"], ["c"]]), -1, [["a", "b"], ["c", "test"]]),
+    (Table([["a"], ["b", "c"]]), -1, [["a"], ["b", "c"], ["test"]]),
+    (Table([["a"], ["b", "c"]]),  0, [["a", "test"], ["b", "c"]]),
+])
+def test_append_column(table, start, expected_state):
+    table.append_to_column("test", start)
+    assert table.columns == expected_state
+
+
 @pytest.mark.parametrize("input,max_row_width,padding, expected", [
     ("abc", 2, 0, [["a", "b"], ["c"]]),
     (["i", "in", "inc", "incr", "incre"], 4, 0, [["i", "in", "inc", "incr", "incre"]]),
