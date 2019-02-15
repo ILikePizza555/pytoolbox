@@ -56,7 +56,7 @@ def flag_or_action(flag_type):
     """
     def action_constructor(option_strings,
                            dest,
-                           const,
+                           const=None,
                            nargs=0,
                            default=None,
                            type=None,
@@ -97,9 +97,12 @@ class FlagArg(Flag):
         return obj
     
     @classmethod
-    def add_to_parser(cls, parser, dest=None, action=flag_or_action, **kwargs):
+    def add_to_parser(cls, parser, dest=None, action=None, **kwargs):
         if not dest:
             dest = _to_camel_case(cls.__name__)
+        
+        if not action:
+            action = flag_or_action(cls)
 
         for i in cls:
             parser.add_argument(*i.flags, dest=dest, action=action, **kwargs)
