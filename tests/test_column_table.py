@@ -7,7 +7,7 @@ import pytest
     (Table([["a"], ["b"], ["c"], ["d"]]), 3, 1, ["b", "c", "d"], [["a"]]),
     (Table([["a", "b"], ["c", "d"], ["e"], ["f"]]), 1, 1, ["c"], [["a", "b"], ["d"], ["e"], ["f"]]),
     (Table([["a", "b"], ["c", "d"], ["e"], ["f"]]), 3, 1, ["c", "d", "e"], [["a", "b"], ["f"]]),
-    (Table([["a"]]), 1, 0, ["a"], [[]])
+    (Table([["a"]]), 1, 0, ["a"], [])
 ])
 def test_take(table, n, start, expected_rv, expected_state):
     actual = table._take(n, start)
