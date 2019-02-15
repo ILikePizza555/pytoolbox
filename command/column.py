@@ -131,9 +131,11 @@ class Table():
         if row_count < self.row_num:
             raise ValueError("row_count cannot be less than current number of rows")
 
-        for i_col in range(self.col_num):
+        i_col = 0
+        while i_col < self.col_num:
             n = row_count - len(self.columns[i_col])
             self.columns[i_col].extend(self._take(n, i_col + 1))
+            i_col += 1
 
     @property
     def col_num(self):
