@@ -97,6 +97,10 @@ def short_list_out(items: Iterable[Path], formatter=lambda p: p.name):
         print(formatter(i))
 
 
+def long_out(items: Iterable[Path], mode=LongOutputFormat.LONG, formatter=lambda p: p.name):
+    pass
+
+
 _PRINT_FUNC_MAP = {
     ShortOutputFormat.COLUMNS: short_column_out,
     ShortOutputFormat.ROWS: short_row_out,
@@ -121,18 +125,20 @@ def ls(paths: List[Path], print_func, pf_args={}, show_hidden=False, show_dots=F
 
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
+    pf_args = {}
 
     # Choose which method of printing should be used
-    if parsed_args.short_output_format:
+    if parsed_args.long_output_format:
+        print_func = long_out
+        pf_args["mode"] = parsed_args.long_output_format
+    elif parsed_args.short_output_format:
         print_func = _PRINT_FUNC_MAP[parsed_args.short_output_format]
     else:
         print_func = short_column_out
 
     # Decide on a formatter
     if parsed_args.augment_output:
-        pf_args = {"formatter": dir_format}
-    else:
-        pf_args = {}
+        pf_args["formatter"] = dir_format
 
     paths = resolve_paths(parsed_args.paths, ignore=["."])
     ls(paths,
