@@ -38,13 +38,13 @@ class EnumArg(Enum):
         """
         Adds the enum to an argument parser from the argparse library.
 
-        If `dest` exists in args, the member's dest argument is ignored.
+        If `dest` doesn't exist, the enum name is used.
         """
         if not dest:
             dest = _to_camel_case(cls.__name__)
 
         for i in cls:
-            for k, v in i.parser_args.values():
+            for k, v in i.parser_args.items():
                 kwargs[k] = v
 
             parser.add_argument(*i.arg_flags, dest=dest, action="store_const", const=i, **kwargs)
@@ -110,7 +110,7 @@ class FlagArg(Flag):
             action = flag_or_action(cls)
 
         for i in cls:
-            for k, v in i.parser_args.values():
+            for k, v in i.parser_args.items():
                 kwargs[k] = v
 
             parser.add_argument(*i.flags, dest=dest, action=action, const=i, **kwargs)
