@@ -208,7 +208,7 @@ class Table():
         table = cls()
 
         def n_row_size(n):
-            return sum(length_function(x) + column_padding for x in table.rows[n])
+            return sum(length_function(x) + column_padding for x in table.rows[n] if x is not None)
 
         for item in input:
             table.append_to_column(item)
