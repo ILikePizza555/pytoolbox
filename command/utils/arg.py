@@ -90,16 +90,16 @@ def flag_or_action(flag_type):
 
 
 class FlagArg(Flag):
-    def __new__(cls, value, flags: List[str], **kwargs):
+    def __new__(cls, value, flags: List[str], parser_args={}):
         if isinstance(value, auto):
             value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
 
         obj = object.__new__(cls)
         obj._value_ = value
         obj.flags = flags
-        obj.kwargs = kwargs
+        obj.parser_args = parser_args
         return obj
-    
+
     @classmethod
     def add_to_parser(cls, parser, dest=None, action=None, **kwargs):
         if not dest:
@@ -109,7 +109,10 @@ class FlagArg(Flag):
             action = flag_or_action(cls)
 
         for i in cls:
-            parser.add_argument(*i.flags, dest=dest, action=action, const=i, **i.kwargs, **kwargs)
+            for k, v in i.parser_args.values():
+                kwargs[k] = v
+
+            parser.add_argument(*i.flags, dest=dest, action=action, const=i, **kwargs)
 
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
