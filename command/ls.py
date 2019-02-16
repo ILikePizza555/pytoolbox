@@ -1,11 +1,12 @@
 from typing import List
-from enum import Enum, Flag, auto
 from pathlib import Path
 from command.utils.arg import FlagArg, EnumArg, resolve_paths
+from command.column import Table
 import argparse
+import os
 
 
-class LongOutputMethod(FlagArg):
+class LongOutputFormat(FlagArg):
     LONG = 1, ["-l"], {"help": "Write output in long format."}
     NO_OWNER = 2, ["-g"], {"help": "Turn on long output, but disable writing the file owner's name and number."}
     NO_GROUP = 4, ["-o"], {"help": "Turn on long ouput, but disable writing the file's group name and number."}
@@ -61,13 +62,40 @@ recurse_group = arg_parser.add_mutually_exclusive_group()
 recurse_group.add_argument("-R", action="store_true", dest="recurse", help="Descend into all subdirectories encountered."),
 recurse_group.add_argument("-d", action="store_false", default=False, dest="recurse", help="Treat subdirectories no differently.")
 
-LongOutputMethod.add_to_parser(arg_parser.add_mutually_exclusive_group())
+LongOutputFormat.add_to_parser(arg_parser.add_mutually_exclusive_group())
 EntryOutput.add_to_parser(arg_parser.add_mutually_exclusive_group())
 ShortOutputFormat.add_to_parser(arg_parser.add_mutually_exclusive_group())
 AugmentOutput.add_to_parser(arg_parser.add_mutually_exclusive_group())
 DereferenceBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 SortBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 TimeBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
+
+
+def short_column_out(items: List[Path], formatter=lambda p: p.name):
+    t = Table.create_column_first(map(formatter, items), os.get_terminal_size()[0], 2)
+    t.print_table()
+
+
+def short_row_out(items: List[Path], formatter=lambda p: p.name):
+    t = Table.create_row_first(items, os.get_terminal_size()[0], 2)
+    t.print_table()
+
+
+def short_stream_out(items: List[Path], formatter=lambda p: p.name):
+    print(", ".join(map(formatter, items)))
+
+
+def short_list_out(items: List[Path], formatter=lambda p: p.name):
+    for i in items:
+        print(formatter(i))
+
+
+_PRINT_FUNC_MAP = {
+    ShortOutputFormat.COLUMNS: short_column_out,
+    ShortOutputFormat.ROWS: short_row_out,
+    ShortOutputFormat.STREAM: short_stream_out,
+    ShortOutputFormat.LIST: short_list_out,
+}
 
 
 def ls(paths: List[Path], print_func, recurse=False):
@@ -87,7 +115,12 @@ def ls(paths: List[Path], print_func, recurse=False):
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
+    if parsed_args.short_output_format:
+        print_func = _PRINT_FUNC_MAP[parsed_args.short_output_format]
+    else:
+        print_func = short_column_out
+
     paths = resolve_paths(parsed_args.paths, ignore=["."])
-    ls(paths)
+    ls(paths, print_func)
 
     return 0
