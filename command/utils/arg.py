@@ -147,11 +147,3 @@ def iterate_input_files(paths: List[Path], default=sys.stdin, **open_args):
 
             if not f.closed:
                 f.close()
-
-
-def add_enum_arguments(enum_type, parser, args: List[tuple], dest=None):
-    if not dest:
-        dest = _to_camel_case(enum_type.__name__)
-
-    for flag, const, pass_through in args:
-        parser.add_argument(flag, action="store_const", dest=dest, const=const, **pass_through)
