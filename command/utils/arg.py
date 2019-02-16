@@ -22,31 +22,32 @@ class EnumArg(Enum):
         - dest: str, an optional string specifying the dest argument in argparse
     """
 
-    def __new__(cls, value: Any, flag: List[str], dest: Optional[str] = None, parser_args: dict = {}):
+    def __new__(cls, value: Any, flag: List[str], parser_args: dict = {}):
         if isinstance(value, auto):
             value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
 
         obj = object.__new__(cls)
         obj._value_ = value
         obj.arg_flags = flag
-
         obj.parser_args = parser_args
-        obj.parser_args["dest"] = dest
 
         return obj
 
     @classmethod
-    def add_to_parser(cls, parser, **kwargs):
+    def add_to_parser(cls, parser, dest=None, **kwargs):
         """
         Adds the enum to an argument parser from the argparse library.
 
         If `dest` exists in args, the member's dest argument is ignored.
         """
+        if not dest:
+            dest = _to_camel_case(cls.__name__)
+
         for i in cls:
             for k, v in i.parser_args.values():
                 kwargs[k] = v
 
-            parser.add_argument(*i.arg_flags, action="store_const", const=i, **kwargs)
+            parser.add_argument(*i.arg_flags, dest=dest, action="store_const", const=i, **kwargs)
 
 
 def flag_or_action(flag_type):
