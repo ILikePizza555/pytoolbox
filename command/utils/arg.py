@@ -100,12 +100,12 @@ class FlagArg(Flag):
     def add_to_parser(cls, parser, dest=None, action=None, **kwargs):
         if not dest:
             dest = _to_camel_case(cls.__name__)
-        
+
         if not action:
             action = flag_or_action(cls)
 
         for i in cls:
-            parser.add_argument(*i.flags, dest=dest, action=action, **kwargs)
+            parser.add_argument(*i.flags, dest=dest, action=action, const=i, **kwargs)
 
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
