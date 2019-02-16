@@ -244,3 +244,16 @@ def _cmd_main(args: List[str]):
     _resolve_defaults(parsed_args)
 
     parsed_args.file = resolve_paths(parsed_args.file or "-")
+    lines = []
+    for f in iterate_input_files(parsed_args.file):
+        lines.extend([s.strip("\n") for s in f])
+
+    if not parsed_args.output_mode or parsed_args.output_mode == OutputMode.COL_FIRST:
+        table = Table.create_column_first(lines, parsed_args.output_width, len(parsed_args.output_separator))
+    elif parsed_args.output_mode == OutputMode.ROW_FIRST:
+        table = Table.create_row_first(lines, parsed_args.output_width, len(parsed_args.output_separator))
+    elif parsed_args.output_mode == OutputMode.TABLE:
+        table = Table.table_from_lines(lines, parsed_args.separator)
+    
+    table.print_table(parsed_args.output_separator)
+    return 0
