@@ -104,7 +104,7 @@ def ls(paths: List[Path], print_func, show_hidden=False, show_dots=False, recurs
             print(f"{path}:")
 
         if path.is_dir():
-            items = list(path.iterdir())
+            items = (p for p in path.iterdir() if show_hidden or not file_utils.is_hidden(p))
 
             print_func(items)
 
