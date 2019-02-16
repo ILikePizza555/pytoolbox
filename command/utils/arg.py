@@ -21,17 +21,20 @@ class EnumArg(Enum):
         - flag: List[str], a list of flags that that should set this value
         - dest: str, an optional string specifying the dest argument in argparse
     """
-    
-    def __new__(cls, value: Any, flag: List[str], dest: Optional[str] = None):
+
+    def __new__(cls, value: Any, flag: List[str], dest: Optional[str] = None, parser_args: dict = {}):
         if isinstance(value, auto):
             value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
 
         obj = object.__new__(cls)
         obj._value_ = value
         obj.arg_flags = flag
-        obj.dest = dest
+
+        obj.parser_args = parser_args
+        obj.parser_args["dest"] = dest
+
         return obj
-    
+
     @classmethod
     def add_to_parser(cls, parser, **kwargs):
         """
@@ -40,10 +43,10 @@ class EnumArg(Enum):
         If `dest` exists in args, the member's dest argument is ignored.
         """
         for i in cls:
-            if "dest" in kwargs:
-                parser.add_argument(*i.arg_flags, action="store_const", const=i, **kwargs)
-            else:
-                parser.add_argument(*i.arg_flags, action="store_const", const=i, dest=i.dest, **kwargs)
+            for k, v in i.parser_args.values():
+                kwargs[k] = v
+
+            parser.add_argument(*i.arg_flags, action="store_const", const=i, **kwargs)
 
 
 def flag_or_action(flag_type):
@@ -87,13 +90,14 @@ def flag_or_action(flag_type):
 
 
 class FlagArg(Flag):
-    def __new__(cls, value, flags: List[str]):
+    def __new__(cls, value, flags: List[str], **kwargs):
         if isinstance(value, auto):
             value = cls._generate_next_value_(None, 1, len(cls.__members__), [i.value for k, i in cls.__members__.items()])
 
         obj = object.__new__(cls)
         obj._value_ = value
         obj.flags = flags
+        obj.kwargs = kwargs
         return obj
     
     @classmethod
@@ -105,7 +109,7 @@ class FlagArg(Flag):
             action = flag_or_action(cls)
 
         for i in cls:
-            parser.add_argument(*i.flags, dest=dest, action=action, const=i, **kwargs)
+            parser.add_argument(*i.flags, dest=dest, action=action, const=i, **i.kwargs, **kwargs)
 
 
 def resolve_paths(paths: List[str], base_dir: Path = Path.cwd(), ignore: List[str] = ["-"]) -> List[Path]:
