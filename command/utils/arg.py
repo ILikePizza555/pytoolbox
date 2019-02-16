@@ -41,9 +41,9 @@ class EnumArg(Enum):
         """
         for i in cls:
             if "dest" in kwargs:
-                parser.add_argument(*i.arg_flags, **kwargs)
+                parser.add_argument(*i.arg_flags, action="store_const", const=i, **kwargs)
             else:
-                parser.add_argument(*i.arg_flags, dest=i.dest, **kwargs)
+                parser.add_argument(*i.arg_flags, action="store_const", const=i, dest=i.dest, **kwargs)
 
 
 def flag_or_action(flag_type):
