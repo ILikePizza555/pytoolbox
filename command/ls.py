@@ -27,7 +27,7 @@ class ShortOutputFormat(EnumArg):
 
 
 class AugmentOutput(EnumArg):
-    ALL              = 1, ["-F"], {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk> ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."}
+    ALL              = 1, ["-F"], {"help": "Write a slash ('/') immediately after each pathname that is a directory, an asterisk ('*') after each that is executable, a vertical-line ('|') after each that is a FIFO, and an at-sign ('@') after each that is a symbolic link. For other file types, other symbols may be written."}
     ONLY_DIRECTORIES = 2, ["-p"], {"help": "Write a slash after each filename that's a directory."}
 
 
@@ -72,6 +72,12 @@ SortBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 TimeBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 
 
+def dir_format(p: Path):
+    if p.is_dir():
+        return p.name + "/"
+    return p.name
+
+
 def short_column_out(items: Iterable[Path], formatter=lambda p: p.name):
     t = Table.create_column_first(map(formatter, items), os.get_terminal_size()[0], 2)
     t.print_table()
@@ -99,7 +105,7 @@ _PRINT_FUNC_MAP = {
 }
 
 
-def ls(paths: List[Path], print_func, show_hidden=False, show_dots=False, recurse=False):
+def ls(paths: List[Path], print_func, pf_args={}, show_hidden=False, show_dots=False, recurse=False):
     for path in paths:
         if len(paths) > 1 or recurse:
             print(f"{path}:")
@@ -107,7 +113,7 @@ def ls(paths: List[Path], print_func, show_hidden=False, show_dots=False, recurs
         if path.is_dir():
             items = (p for p in path.iterdir() if show_hidden or not file_utils.is_hidden(p))
 
-            print_func(items)
+            print_func(items, **pf_args)
 
             if recurse:
                 ls([x for x in items if x.is_dir()], print_func, recurse)
@@ -116,14 +122,22 @@ def ls(paths: List[Path], print_func, show_hidden=False, show_dots=False, recurs
 def _cmd_main(args: List[str]):
     parsed_args = arg_parser.parse_args(args)
 
+    # Choose which method of printing should be used
     if parsed_args.short_output_format:
         print_func = _PRINT_FUNC_MAP[parsed_args.short_output_format]
     else:
         print_func = short_column_out
 
+    # Decide on a formatter
+    if parsed_args.augment_output:
+        pf_args = {"formatter": dir_format}
+    else:
+        pf_args = {}
+
     paths = resolve_paths(parsed_args.paths, ignore=["."])
     ls(paths,
        print_func,
+       pf_args=pf_args,
        show_hidden=bool(parsed_args.entry_output),
        show_dots=bool(parsed_args.entry_output == EntryOutput.SHOW_HIDDEN_PLUS),
        recurse=parsed_args.recurse)
