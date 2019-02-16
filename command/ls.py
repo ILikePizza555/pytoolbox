@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, Iterable
 from pathlib import Path
 from command.utils.arg import FlagArg, EnumArg, resolve_paths
 from command.column import Table
 import argparse
 import os
+import command.utils.file as file_utils
 
 
 class LongOutputFormat(FlagArg):
@@ -71,21 +72,21 @@ SortBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 TimeBehavior.add_to_parser(arg_parser.add_mutually_exclusive_group())
 
 
-def short_column_out(items: List[Path], formatter=lambda p: p.name):
+def short_column_out(items: Iterable[Path], formatter=lambda p: p.name):
     t = Table.create_column_first(map(formatter, items), os.get_terminal_size()[0], 2)
     t.print_table()
 
 
-def short_row_out(items: List[Path], formatter=lambda p: p.name):
+def short_row_out(items: Iterable[Path], formatter=lambda p: p.name):
     t = Table.create_row_first(items, os.get_terminal_size()[0], 2)
     t.print_table()
 
 
-def short_stream_out(items: List[Path], formatter=lambda p: p.name):
+def short_stream_out(items: Iterable[Path], formatter=lambda p: p.name):
     print(", ".join(map(formatter, items)))
 
 
-def short_list_out(items: List[Path], formatter=lambda p: p.name):
+def short_list_out(items: Iterable[Path], formatter=lambda p: p.name):
     for i in items:
         print(formatter(i))
 
