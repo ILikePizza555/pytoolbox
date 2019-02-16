@@ -98,7 +98,7 @@ _PRINT_FUNC_MAP = {
 }
 
 
-def ls(paths: List[Path], print_func, recurse=False):
+def ls(paths: List[Path], print_func, show_hidden=False, show_dots=False, recurse=False):
     for path in paths:
         if len(paths) > 1 or recurse:
             print(f"{path}:")
@@ -121,6 +121,10 @@ def _cmd_main(args: List[str]):
         print_func = short_column_out
 
     paths = resolve_paths(parsed_args.paths, ignore=["."])
-    ls(paths, print_func)
+    ls(paths,
+       print_func,
+       show_hidden=bool(parsed_args.entry_output),
+       show_dots=bool(parsed_args.entry_output == EntryOutput.SHOW_HIDDEN_PLUS),
+       recurse=parsed_args.recurse)
 
     return 0
