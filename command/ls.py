@@ -110,6 +110,18 @@ _PRINT_FUNC_MAP = {
 
 
 def ls(paths: List[Path], print_func, pf_args={}, show_hidden=False, show_dots=False, recurse=False):
+    """
+    Iterates over the directories in `paths`, collects items to be printed, and passes them as the first argument to
+    print_func.
+
+    Arguments:
+        paths -- A list of Path objects which point to directories to iterate over.
+        print_func -- A function which takes a list of Path objects to be printed.
+        pf_args -- Aditional arguments to pass to print_func.
+        show_hidden -- If True, hidden files will be collected.
+        show_dots -- If True "." and ".." will be collected.
+        recurse -- If True, ls will recurse on any sub-directories collected.
+    """
     for path in paths:
         if len(paths) > 1 or recurse:
             print(f"{path}:")
